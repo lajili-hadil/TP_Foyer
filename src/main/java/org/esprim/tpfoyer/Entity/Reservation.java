@@ -6,7 +6,9 @@ import jakarta.persistence.ManyToMany;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 
@@ -16,12 +18,15 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class Reservation {
+
+public class Reservation implements Serializable {
     @Id
     String idReservation;
     Date anneeUniversitaire;
     boolean estValide;
+
+    @ManyToMany
+    private List<Etudiant> etudiants;
 
 }
 

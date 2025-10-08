@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -13,13 +15,18 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class Foyer {
+public class Foyer implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long idFoyer;
     String nomFoyer;
     long capaciteFoyer;
+
+    @OneToOne(mappedBy = "foyer")
+    private Universite universite;
+
+    @OneToMany(mappedBy = "foyer",cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    private List<Bloc> blocs;
 
 }
 
