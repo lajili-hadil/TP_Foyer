@@ -1,6 +1,7 @@
 package org.esprim.tpfoyer.Services;
 
 import org.esprim.tpfoyer.Entity.Chambre;
+import org.esprim.tpfoyer.Entity.TypeChambre;
 
 import java.util.List;
 
@@ -13,4 +14,6 @@ public interface ChambreService {
     public  Chambre modifyChambre(Chambre chambre);
 
     public List<Chambre> getChambresParNomUniversite(String nomUniversite);
+    List<Chambre> getChambresNonReserveParNomUniversiteEtTypeChambre(String nomUniversite, TypeChambre type);
+
 }
