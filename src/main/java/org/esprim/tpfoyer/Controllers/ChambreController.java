@@ -3,6 +3,7 @@ package org.esprim.tpfoyer.Controllers;
 
 import lombok.AllArgsConstructor;
 import org.esprim.tpfoyer.Entity.Chambre;
+import org.esprim.tpfoyer.Entity.TypeChambre;
 import org.esprim.tpfoyer.Services.ChambreService;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,6 +49,12 @@ public class ChambreController {
     @GetMapping("/par-universite/{nomUniversite}")
     public List<Chambre> getChambresParNomUniversite(@PathVariable String nomUniversite) {
         return chambreService.getChambresParNomUniversite(nomUniversite);
+    }
+    @GetMapping("/get-chambres-non-reserve/{nom-universite}/{type}")
+    public List<Chambre> getChambresNonReserveParNomUniversiteEtTypeChambre(
+            @PathVariable("nom-universite") String nomUniversite,
+            @PathVariable("type") TypeChambre type) {
+        return chambreService.getChambresNonReserveParNomUniversiteEtTypeChambre(nomUniversite, type);
     }
 }
 

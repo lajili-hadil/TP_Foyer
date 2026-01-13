@@ -1,16 +1,15 @@
 package org.esprim.tpfoyer.Services;
 
-import com.sun.source.tree.NewArrayTree;
+import lombok.extern.slf4j.Slf4j;
 import org.esprim.tpfoyer.Entity.Bloc;
 import org.esprim.tpfoyer.Entity.Chambre;
 import org.esprim.tpfoyer.Repository.BlocRepository;
 import org.esprim.tpfoyer.Repository.ChambreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
+import java.util.*;
+@Slf4j
 
 @Service
 public class BlocServiceImpl implements BlocService {
@@ -47,29 +46,50 @@ public class BlocServiceImpl implements BlocService {
     }
 
     @Override
-    public Bloc affecterChambresABloc(List<Long> numChambres, long idBloc) {
-        Bloc bloc = blocRepository.findById(idBloc).orElseThrow(() ->new RuntimeException("bloc intovable:"+idBloc));
-
-        List<Chambre> chambres =  chambreRepository.findAllByNumeroChambreIn(numChambres);
-        if (chambres.size() != numChambres.size()) {
-            throw  new RuntimeException("une ou plusieurs"+"chambre sont introuvable");
-        }
-        for (Chambre chambre : chambres)
-            if (chambre.getBloc() != null && chambre.getBloc().getIdBloc()!=idBloc){
-                throw  new RuntimeException("chambre "+chambre.getNumeroChambre()+" est deja affecte a un  autre bloc");
+    public Bloc affecterChambresABloc(List<Long> numChambre, long idBloc) {
+        Bloc bloc = blocRepository.findById(idBloc).orElse(null);
+        if (bloc != null) {
+            for (Long numCh : numChambre) {
+                Chambre chambre = chambreRepository.findById(numCh).orElse(null);
+                if (chambre != null) {
+                    chambre.setBloc(bloc);
+                    chambreRepository.save(chambre);
+                }
             }
-        for (Chambre chambre : chambres){
-            chambre.setBloc(bloc);
+            return bloc;
         }
-        if(bloc.getChambres() ==null)
-            bloc.setChambres((List<Chambre>) new ArrayList<Chambre>());
-
-        bloc.getChambres().addAll(chambres);
-        blocRepository.save(bloc);
-        chambreRepository.saveAll(chambres);
-        return bloc;
+        return null;
     }
+    @Scheduled(cron = "0 */1 * * * *") // Every 1 minute
+    public void afficherChambresParBlocEtType() {
 
+        List<Chambre> chambres = chambreRepository.findAll();
+
+        if (chambres.isEmpty()) {
+            log.info("Aucune chambre en base.");
+            return;
+        }
+
+        Map<String, Map<String, Integer>> map = new HashMap<>();
+
+        for (Chambre chambre : chambres) {
+
+            String blocName = (chambre.getBloc() != null) ? chambre.getBloc().getNomBloc() : "NON AFFECTÉ";
+            String type = (chambre.getTypeC() != null) ? chambre.getTypeC().toString() : "TYPE NON DEFINI";
+
+            map.putIfAbsent(blocName, new HashMap<>());
+            Map<String, Integer> typeCount = map.get(blocName);
+
+            typeCount.put(type, typeCount.getOrDefault(type, 0) + 1);
+        }
+
+        log.info(" Statistiques des chambres par Bloc:");
+
+        map.forEach((bloc, types) -> {
+            log.info("Bloc: " + bloc);
+            types.forEach((type, count) -> log.info(" → " + type + ": " + count));
+        });
+    }
 
 
 }

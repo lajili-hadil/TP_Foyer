@@ -55,6 +55,23 @@ public class ReservationServiceImpl implements ReservationService {
     public Reservation ajouterReservation(long idChambre, long cinEtudiant) {
         return null;
     }
+    @Override
+    public List<Reservation> getReservationParAnneeUniversitaireEtNomUniversite(Date anneeUniversite, String nomUniversite) {
+        // Using JPQL query from repository
+        return reservationRepository.findReservationsByAnneeAndUniversite(anneeUniversite, nomUniversite);
+    }
 
+    private int getMaxCapacity(TypeChambre type) {
+        switch (type) {
+            case SIMPLE:
+                return 1;
+            case DOUBLE:
+                return 2;
+            case TRIPLE:
+                return 3;
+            default:
+                return 0;
+        }
+    }
 
 }
